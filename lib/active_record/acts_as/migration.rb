@@ -5,7 +5,7 @@ module ActiveRecord
         def actable(options = {})
           name = options.delete(:as) || :actable
           options[:polymorphic] = true
-          references(name, options)
+          references(name, **options)
         end
       end
 
