@@ -46,7 +46,7 @@ module ActiveRecord
           cattr_reader(:acting_as_reflection) { reflections.stringify_keys[name.to_s] }
           cattr_reader(:acting_as_name) { name.to_s }
           cattr_reader(:acting_as_model) { (options[:class_name] || name.to_s.camelize).constantize }
-          class_eval "def #{name}; super || build_#{name}(acting_as_model.actable_reflection.name => self); end"
+          class_eval "def #{name}; super || build_#{name}(acting_as_model.actable_reflection_#{as.downcase}.name => self); end"
           alias_method :acting_as, name
           alias_method :acting_as=, "#{name}=".to_sym
 
@@ -85,7 +85,7 @@ module ActiveRecord
                                                                       autosave: true,
                                                                       inverse_of: to_s.underscore))
 
-          cattr_reader(:actable_reflection) { reflections.stringify_keys[name.to_s] }
+          cattr_reader("actable_reflection_#{name.downcase}") { reflections.stringify_keys[name.to_s] }
 
           def self.methods_callable_by_submodel
             @methods_callable_by_submodel ||= Set.new
@@ -100,7 +100,8 @@ module ActiveRecord
             super.tap(&method(:callable_by_submodel))
           end
 
-          alias_method :specific, name
+          # Removed to prevent confusion as specific does not work with multiple calls of 'actable'
+          # alias_method :specific, name
         end
 
         def actable?
